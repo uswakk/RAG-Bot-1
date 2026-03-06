@@ -81,23 +81,22 @@ files = st.file_uploader("Choose a file", type=["pdf", "docx", "txt"], accept_mu
 button_state = st.button("Process Document")  
 
 if button_state:
-    st.write("Processing your document...")
-
+    with st.spinner("Processing..."):
    
-    if files is not None:    
-        #time.sleep(2)  # Simulate processing time
+        if files is not None:    
+            #time.sleep(2)  # Simulate processing time
 
-        #first get raw text from the document
-        raw_text = get_raw_text_from_pdfs(files)
-        #st.write("Text has been split into the following chunks:")
-        chunks = split_text(raw_text)
-        #st.write(chunks)
-        document_ids, vector_store = create_vector_store(chunks)
-        #indexing 
-        st.session_state.vector_store = vector_store
+            #first get raw text from the document
+            raw_text = get_raw_text_from_pdfs(files)
+            #st.write("Text has been split into the following chunks:")
+            chunks = split_text(raw_text)
+            #st.write(chunks)
+            document_ids, vector_store = create_vector_store(chunks)
+            #indexing 
+            st.session_state.vector_store = vector_store
 
 
-    
+time.sleep(1)  # Simulate processing time
 user_query = st.text_input("Write Your Query:")
 
 if user_query:
