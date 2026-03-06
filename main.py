@@ -31,7 +31,7 @@ def get_text_from_docx(file):
     pass
 
 def get_raw_text_from_pdfs(file):
-
+    raw_text = ""
     reader = PdfReader(file)
     for page in reader.pages:
         raw_text += page.extract_text()
@@ -82,7 +82,7 @@ def create_vector_store(chunks):
 
 
 model = ChatOllama(
-    model="tinyllama",
+    model="qwen:1.8b",
     temperature=0,
     # other params...
 )
@@ -100,7 +100,7 @@ if button_state:
             #time.sleep(2)  # Simulate processing time
 
             #first get raw text from the document
-            raw_text = get_raw_text_from_pdfs(files)
+            raw_text = get_text_from_files(files)
             #st.write("Text has been split into the following chunks:")
             chunks = split_text(raw_text)
             #st.write(chunks)
