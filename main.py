@@ -100,23 +100,27 @@ time.sleep(1)  # Simulate processing time
 user_query = st.text_input("Write Your Query:")
 
 if user_query:
-    st.write("Processing your query...")
-    #from langchain.agents import create_agent
+
+    if "vector_store" not in st.session_state:
+        st.warning("Please upload and process a document first.")
+    else: 
+        st.write("Processing your query...")
+        #from langchain.agents import create_agent
 
 
-    retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=1)
-    # If desired, specify custom instructions
-    context = "\n".join([doc.page_content for doc in retrieved_docs])
+        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=1)
+        # If desired, specify custom instructions
+        context = "\n".join([doc.page_content for doc in retrieved_docs])
 
-    prompt = f"""
-    Use the following context to answer the question. Make the answer precise. If the answer is not contained within the context, say you don't know.
+        prompt = f"""
+        Use the following context to answer the question. Make the answer precise. If the answer is not contained within the context, say you don't know.
 
-    Context:
-    {context}
+        Context:
+        {context}
 
-    Question:
-    {user_query}
-    """
+        Question:
+        {user_query}
+        """
 
-    ai_msg = model.invoke(prompt)
-    st.write(ai_msg.content)
+        ai_msg = model.invoke(prompt)
+        st.write(ai_msg.content)
