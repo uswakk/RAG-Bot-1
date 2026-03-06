@@ -35,7 +35,7 @@ def get_raw_text_from_pdfs(files):
             raw_text += page.extract_text()
     return raw_text
 
-def split_text(text, chunk_size=800, chunk_overlap=150):
+def split_text(text, chunk_size=1500, chunk_overlap=150):
 
     text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=chunk_size,  # chunk size (characters)
