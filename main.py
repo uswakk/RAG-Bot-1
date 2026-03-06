@@ -27,12 +27,27 @@ torch.classes.__path__ = []
 
 #make functions to make everything simpler
 
-def get_raw_text_from_pdfs(files):
+def get_text_from_docx(file):
+    pass
+
+def get_raw_text_from_pdfs(file):
+
+    reader = PdfReader(file)
+    for page in reader.pages:
+        raw_text += page.extract_text()
+    return raw_text
+
+def get_text_from_files(files):
     raw_text = ""
     for file in files:
-        reader = PdfReader(file)
-        for page in reader.pages:
-            raw_text += page.extract_text()
+        ext = file.name.split(".")[-1].lower()
+        if ext == "pdf":
+            text = get_raw_text_from_pdfs(file)
+        elif ext == "docx":
+            text = get_text_from_docx(file)
+        elif ext == "txt":
+            text = file.read().decode("utf-8")
+        raw_text += text + "\n"
     return raw_text
 
 def split_text(text, chunk_size=1500, chunk_overlap=150):
@@ -49,22 +64,20 @@ def split_text(text, chunk_size=1500, chunk_overlap=150):
 
 def create_vector_store(chunks):
        
-     
+    embeddings = OllamaEmbeddings(model="granite-embedding")
 
-        embeddings = OllamaEmbeddings(model="granite-embedding")
+    embedding_dim = len(embeddings.embed_query("hello world"))
+    index = faiss.IndexFlatL2(embedding_dim)
 
-        embedding_dim = len(embeddings.embed_query("hello world"))
-        index = faiss.IndexFlatL2(embedding_dim)
+    vector_store = FAISS(
+        embedding_function=embeddings,
+        index=index,
+        docstore=InMemoryDocstore(),
+        index_to_docstore_id={},
+    )
 
-        vector_store = FAISS(
-            embedding_function=embeddings,
-            index=index,
-            docstore=InMemoryDocstore(),
-            index_to_docstore_id={},
-        )
-
-        document_ids = vector_store.add_texts(texts=chunks)
-        return document_ids, vector_store
+    document_ids = vector_store.add_texts(texts=chunks)
+    return document_ids, vector_store
 
 
 
@@ -103,7 +116,7 @@ if user_query:
 
     if "vector_store" not in st.session_state:
         st.warning("Please upload and process a document first.")
-    else: 
+    else:
         st.write("Processing your query...")
         #from langchain.agents import create_agent
 
