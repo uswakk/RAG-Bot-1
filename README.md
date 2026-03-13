@@ -8,21 +8,49 @@ The application processes the documents, converts the text into embeddings, stor
 
 ## Features
 
-* Upload documents and extract their text
-* Automatically split documents into smaller chunks
-* Generate embeddings for each chunk
-* Store embeddings in a FAISS vector database
-* Retrieve relevant document sections for a query
-* Generate answers using a language model
-* Simple user interface built with Streamlit
+- Upload documents (PDF, DOCX, TXT) and extract text.  
+- Accurate PDF parsing with **pdfplumber**.  
+- Split documents into smaller, indexed chunks.  
+- Generate embeddings for each chunk using **Ollama embeddings**.  
+- Store embeddings in a **FAISS vector store** for fast similarity search.  
+- Retrieve the most relevant chunks for a query.  
+- Generate concise, factual answers using **Qwen 1.8B**.  
+- Streamlit-based simple and interactive UI.  
+- Latency optimization: context truncation and controlled chunk retrieval. 
+
+# Mini RAG Bot
+
+## Overview
+
+**Mini RAG Bot** is a lightweight Retrieval-Augmented Generation (RAG) application that allows users to upload documents (PDF, DOCX, TXT) and ask questions about their content. The system extracts text, converts it into embeddings, stores them in a FAISS vector database, and retrieves relevant context to provide precise answers using a language model.
+
+This version improves text extraction accuracy using **pdfplumber** for PDFs, optimizes context truncation to reduce latency, and uses **Qwen 1.8B** with **Ollama embeddings** for high-quality answers.
+
+---
+
+## Features
+
+- Upload documents (PDF, DOCX, TXT) and extract text.  
+- Accurate PDF parsing with **pdfplumber**.  
+- Split documents into smaller, indexed chunks.  
+- Generate embeddings for each chunk using **Ollama embeddings**.  
+- Store embeddings in a **FAISS vector store** for fast similarity search.  
+- Retrieve the most relevant chunks for a query.  
+- Generate concise, factual answers using **Qwen 1.8B**.  
+- Streamlit-based simple and interactive UI.  
+- Latency optimization: context truncation and controlled chunk retrieval.  
+
+---
 
 ## Technologies Used
 
-* **TinyLlama** – Language model used for generating responses
-* **Granite Embeddings** – Used to convert text into vector representations
-* **FAISS** – Vector database for similarity search
-* **Streamlit** – Lightweight UI for interacting with the application
-* **LangChain** – Framework used to integrate models, embeddings, and vector stores
+- **Qwen 1.8B** – Language model for response generation.  
+- **Ollama Embeddings (nomic-embed-text:v1.5)** – Convert text into vector representations.  
+- **FAISS** – Vector database for efficient similarity search.  
+- **pdfplumber** – Improved PDF parsing.  
+- **docx / txt parsing** – Extract text from Word and text files.  
+- **LangChain** – Orchestrates model, embeddings, and vector store.  
+- **Streamlit** – Lightweight web interface.  
 
 ## Installation
 
@@ -49,8 +77,8 @@ https://ollama.com
 After installing Ollama, run the following commands:
 
 ```
-ollama pull tinyllama
-ollama pull granite-embedding
+ollama pull qwen:1.8b
+ollama pull nomic-embed-text:v1.5
 ```
 
 ## Running the Application
