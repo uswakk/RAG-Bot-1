@@ -89,8 +89,12 @@ def create_vector_store(chunks):
 
 model = ChatOllama(
     model="qwen:1.8b",
-    temperature=0,
-    # other params...
+    temperature=0.1, # Small increase allows for slight variation
+    num_predict=250, # Limits the total output length to prevent infinite loops
+    model_kwargs={
+        "repeat_penalty": 1.2, # Higher value (1.1 - 1.5) prevents repetition
+        "top_p": 0.9,          # Focuses the model on the most likely words
+    }
 )
 
 st.title("Ask Questions Related To Your Documents")
