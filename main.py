@@ -67,10 +67,10 @@ def split_text(text, chunk_size=1500, chunk_overlap=150):
     return chunks
 
 #add caching to the vector store creation to speed up subsequent queries
-#@st.cache_resource
+@st.cache_resource
 def create_vector_store(chunks):
        
-    embeddings = OllamaEmbeddings(model="granite-embedding")
+    embeddings = OllamaEmbeddings(model="nomic-embed-text:v1.5")
 
     embedding_dim = len(embeddings.embed_query("hello world"))
     index = faiss.IndexFlatL2(embedding_dim)
