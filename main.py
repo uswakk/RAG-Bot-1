@@ -130,18 +130,30 @@ if user_query:
         st.write("Processing your query...")
         #from langchain.agents import create_agent
 
+        is_summary = any(word in user_query.lower() for word in ["summarize", "summary", "overview"])
+        k_value = 5 if is_summary else 2
 
-        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=4)
+        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=k_value)
         # If desired, specify custom instructions
         context = "\n".join([doc.page_content for doc in retrieved_docs])
 
         prompt = f"""
-        ### INSTRUCTION
-        You are a helpful assistant. Use the provided Context to answer the Question.
-        - If the Question asks for a summary, provide 3-5 concise bullet points.
-        - If the Question is a specific query, provide a direct and precise answer.
-        - If the answer is not in the Context, simply state: "I do not have enough information."
-        - DO NOT repeat the same sentence or phrase multiple times.
+        ### SYSTEM INSTRUCTION
+        You are a precise Document Assistant. Answer the Question based ONLY on the provided Context. 
+        - Be direct. Do not use filler phrases like "Based on the text..."
+        - If a summary is requested, use a short bulleted list.
+        - If you cannot find the answer, say "Information not available."
+        - CRITICAL: Do not repeat words, phrases, or sentences.
+
+        ### FORMAT EXAMPLES
+        Question: Summarize the document.
+        Answer: 
+        - Definition: PageRank measures node importance in a network.
+        - Mechanism: It uses link structures to assign numerical weights.
+        - Goal: To rank web pages in search engine results.
+
+        Question: What is the main topic?
+        Answer: The main topic is relational classification and its application in social network data analysis.
 
         ### CONTEXT
         {context}
@@ -149,7 +161,7 @@ if user_query:
         ### QUESTION
         {user_query}
 
-        ### ANSWER (concise and direct):
+        ### ANSWER:
         """
 
         ai_msg = model.invoke(prompt)
