@@ -89,10 +89,10 @@ def create_vector_store(chunks):
 
 model = ChatOllama(
     model="qwen:1.8b",
-    temperature=0.1, # Small increase allows for slight variation
-    num_predict=250, # Limits the total output length to prevent infinite loops
+    temperature=0.05, # Small increase allows for slight variation
+    num_predict=150, # Limits the total output length to prevent infinite loops
     model_kwargs={
-        "repeat_penalty": 1.2, # Higher value (1.1 - 1.5) prevents repetition
+        "repeat_penalty": 1.5, # Higher value (1.1 - 1.5) prevents repetition
         "top_p": 0.9,          # Focuses the model on the most likely words
     }
 )
@@ -127,33 +127,48 @@ if user_query:
     if "vector_store" not in st.session_state:
         st.warning("Please upload and process a document first.")
     else:
-        st.write("Processing your query...")
+        #st.write("Processing your query...")
         #from langchain.agents import create_agent
 
-        is_summary = any(word in user_query.lower() for word in ["summarize", "summary", "overview"])
-        k_value = 5 if is_summary else 2
-
-        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=k_value)
+        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=4)
         # If desired, specify custom instructions
         context = "\n".join([doc.page_content for doc in retrieved_docs])
+        context =context[:7000]
 
         prompt = f"""
-        ### SYSTEM INSTRUCTION
-        You are a precise Document Assistant. Answer the Question based ONLY on the provided Context. 
-        - Be direct. Do not use filler phrases like "Based on the text..."
-        - If a summary is requested, use a short bulleted list.
-        - If you cannot find the answer, say "Information not available."
-        - CRITICAL: Do not repeat words, phrases, or sentences.
+        ### ROLE
+        You are a precise document assistant.
 
-        ### FORMAT EXAMPLES
-        Question: Summarize the document.
-        Answer: 
-        - Definition: PageRank measures node importance in a network.
-        - Mechanism: It uses link structures to assign numerical weights.
-        - Goal: To rank web pages in search engine results.
+        ### TASK
+        Answer the QUESTION using ONLY the information found in the CONTEXT.
 
-        Question: What is the main topic?
-        Answer: The main topic is relational classification and its application in social network data analysis.
+        ### RULES
+        1. Do NOT use knowledge outside the CONTEXT.
+        2. If the answer cannot be found in the CONTEXT, reply exactly:
+        "Information not available."
+        3. Be concise and factual.
+        4. Never repeat sentences or phrases.
+        5. Do not restate the question.
+        6. Maximum answer length: 5 sentences.
+
+        ### RESPONSE FORMAT
+
+        If the question asks for a summary:
+        - Write 3–5 short bullet points.
+        - Each bullet must contain one key idea.
+
+        If the question asks about fiction:
+        - Describe the important events involving the characters.
+
+        If the question asks about lectures or non-fiction:
+        - Focus on definitions, data, and core concepts.
+
+        ### PROCESS
+        Follow these steps internally before answering:
+        1. Locate relevant information in the CONTEXT.
+        2. Extract only the key facts.
+        3. Write the answer once.
+        4. Stop immediately after the answer.
 
         ### CONTEXT
         {context}
@@ -161,8 +176,7 @@ if user_query:
         ### QUESTION
         {user_query}
 
-        ### ANSWER:
+        ### ANSWER
         """
 
-        ai_msg = model.invoke(prompt)
-        st.write(ai_msg.content)
+        st.write_stream(model.stream(prompt))
