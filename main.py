@@ -134,7 +134,15 @@ if user_query:
 
         retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=3)
         # If desired, specify custom instructions
-        context = "\n".join([doc.page_content for doc in retrieved_docs])
+        max_context_chars = 4000
+        context = ""
+
+        for doc in retrieved_docs:
+            remaining_chars = max_context_chars - len(context)
+            if remaining_chars <= 0:
+                break
+            # Take only the first `remaining_chars` of this chunk
+            context += doc.page_content[:remaining_chars] + "\n"
 
         prompt = f"""
         ### ROLE
@@ -143,14 +151,12 @@ if user_query:
         ### TASK
         Answer the QUESTION using ONLY the information found in the CONTEXT.
 
-        ### RULES
-        1. Do NOT use knowledge outside the CONTEXT.
-        2. If the answer cannot be found in the CONTEXT, reply exactly:
-        "Information not available."
-        3. Be concise and factual.
-        4. Never repeat sentences or phrases.
-        5. Do not restate the question.
-        6. Maximum answer length: 5 sentences.
+      1. Do NOT use knowledge outside the CONTEXT.
+      2. Only summarize what is explicitly present in the CONTEXT.
+      3. If the answer cannot be found in the CONTEXT, reply exactly:"Information not available."
+      4. Be concise and factual.
+      5. Never repeat sentences or phrases.
+      6. Maximum answer length: 5 sentences.
 
         ### RESPONSE FORMAT
 
