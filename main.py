@@ -131,18 +131,25 @@ if user_query:
         #from langchain.agents import create_agent
 
 
-        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=1)
+        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=4)
         # If desired, specify custom instructions
         context = "\n".join([doc.page_content for doc in retrieved_docs])
 
         prompt = f"""
-        Use the following context to answer the question. Make the answer precise. If the answer is not contained within the context, say you don't know.
+        ### INSTRUCTION
+        You are a helpful assistant. Use the provided Context to answer the Question.
+        - If the Question asks for a summary, provide 3-5 concise bullet points.
+        - If the Question is a specific query, provide a direct and precise answer.
+        - If the answer is not in the Context, simply state: "I do not have enough information."
+        - DO NOT repeat the same sentence or phrase multiple times.
 
-        Context:
+        ### CONTEXT
         {context}
 
-        Question:
+        ### QUESTION
         {user_query}
+
+        ### ANSWER (concise and direct):
         """
 
         ai_msg = model.invoke(prompt)
