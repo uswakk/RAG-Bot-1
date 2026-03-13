@@ -17,6 +17,7 @@ import time
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from pypdf import PdfReader
+from docx import Document
 
 #to disable the file watcher for streamlit
 import os 
@@ -28,7 +29,10 @@ torch.classes.__path__ = []
 #make functions to make everything simpler
 
 def get_text_from_docx(file):
-    pass
+    doc = Document(file)
+    full_text = []
+    text = "\n".join([para.text for para in doc.paragraphs])
+    return text
 
 def get_raw_text_from_pdfs(file):
     raw_text = ""
