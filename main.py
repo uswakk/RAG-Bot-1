@@ -66,6 +66,8 @@ def split_text(text, chunk_size=1500, chunk_overlap=150):
 
     return chunks
 
+#add caching to the vector store creation to speed up subsequent queries
+#@st.cache_resource
 def create_vector_store(chunks):
        
     embeddings = OllamaEmbeddings(model="granite-embedding")
@@ -113,7 +115,7 @@ if button_state:
             st.session_state.vector_store = vector_store
 
 
-time.sleep(1)  # Simulate processing time
+
 user_query = st.text_input("Write Your Query:")
 
 if user_query:
