@@ -18,6 +18,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from pypdf import PdfReader
 from docx import Document
+import hashlib
 
 #to disable the file watcher for streamlit
 import os 
@@ -54,7 +55,7 @@ def get_text_from_files(files):
         raw_text += text + "\n"
     return raw_text
 
-def split_text(text, chunk_size=1500, chunk_overlap=150):
+def split_text(text, chunk_size=800, chunk_overlap=80):
 
     text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=chunk_size,  # chunk size (characters)
@@ -65,13 +66,14 @@ def split_text(text, chunk_size=1500, chunk_overlap=150):
     chunks = text_splitter.split_text(text)
 
     return chunks
+    
 
 #add caching to the vector store creation to speed up subsequent queries
+embeddings = OllamaEmbeddings(model="nomic-embed-text:v1.5")
+
 @st.cache_resource
 def create_vector_store(chunks):
-       
-    embeddings = OllamaEmbeddings(model="nomic-embed-text:v1.5")
-
+    
     embedding_dim = len(embeddings.embed_query("hello world"))
     index = faiss.IndexFlatL2(embedding_dim)
 
@@ -90,7 +92,7 @@ def create_vector_store(chunks):
 model = ChatOllama(
     model="qwen:1.8b",
     temperature=0.05, # Small increase allows for slight variation
-    num_predict=150, # Limits the total output length to prevent infinite loops
+    num_predict=300, # Limits the total output length to prevent infinite loops
     model_kwargs={
         "repeat_penalty": 1.5, # Higher value (1.1 - 1.5) prevents repetition
         "top_p": 0.9,          # Focuses the model on the most likely words
@@ -130,10 +132,9 @@ if user_query:
         #st.write("Processing your query...")
         #from langchain.agents import create_agent
 
-        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=4)
+        retrieved_docs = st.session_state.vector_store.similarity_search(user_query, k=3)
         # If desired, specify custom instructions
         context = "\n".join([doc.page_content for doc in retrieved_docs])
-        context =context[:7000]
 
         prompt = f"""
         ### ROLE
